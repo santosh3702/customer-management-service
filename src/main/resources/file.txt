@@ -1,0 +1,18 @@
+ CREATE TABLE customermanagement(
+gender varchar(10),
+email varchar(1000),
+contactNo varchar(15),
+fName varchar(1000),
+sName varchar(1000),
+cId   varchar(1000),
+password   varchar(1000),
+username   varchar(1000),
+addressLine1  VARCHAR(1000),
+  addressLine2  VARCHAR(1000),
+  city  VARCHAR(100),
+  state  VARCHAR(100),
+  country   VARCHAR(100),
+  zipcode  VARCHAR(100));  
+  
+  
+  

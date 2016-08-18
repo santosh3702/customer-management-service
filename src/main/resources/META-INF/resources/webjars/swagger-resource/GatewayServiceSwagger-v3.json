@@ -1,0 +1,904 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Provisioning Gateway Service is the entry point for the COX to provision or activate Devices.",
+        "version": "1.0",
+        "title": "ProvisioningGatewayService",
+        "termsOfService": "ProvisioningGatewayService"
+    },
+    "tags": [
+     
+        {
+            "name": "provisioning-gateway-rest-controller",
+            "description": "Provisioning Gateway Rest Controller"
+        }
+    ],
+    "paths": {
+     
+        "/provisioningGatewayService/json/submitProvRequest": {
+            "post": {
+                "tags": [
+                    "provisioning-gateway-rest-controller"
+                ],
+                "summary": "Submit Provisioning Request",
+                "description": "SubmitProvisioning performs all the validations on the incoming request. If validation is success proceeds to switch provisioning,else send error message to consumer ",
+                "operationId": "SubmitProvisioningJsonUsingPOST",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "submitProvisioningReq",
+                        "description": "submitProvisioningReq",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SubmitProvisioning"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SubmitProvisioningResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Error processing request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ComponentAddress": {
+            "type": "object",
+            "description": "This section defines the equipment detail of a Device. If the equipment details are populated, then MAC, device type are mandatory",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "description": "This will be MAC of the device e.g. 00:15:D1:82:2E:5D"
+                },
+                "type": {
+                    "description": "This defines the type of device e.g if MTA MAC or its CM-MAC",
+                    "type": "string",
+                    "enum": [
+                        "CM",
+                        "MTA",
+                        "STB",
+                        "DCM",
+                        "STBUA"
+                    ]
+                }
+            }
+        },
+        "ErrorSummary": {
+            "type": "object",
+            "properties": {
+                "attribute": {
+                    "type": "string"
+                },
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                }
+            }
+        },
+        "SubmitProvisioningResponse": {
+            "type": "object",
+            "properties": {
+                "submitProvisioningResponseType": {
+                    "$ref": "#/definitions/ArrayOfSubmitProvisioningResponseType"
+                },
+                "submitProvisioningReturn": {
+                    "$ref": "#/definitions/SubmitProvisioningResponse"
+                }
+            }
+        },
+        "ArrayOfServiceConfigurations": {
+            "type": "object",
+            "properties": {
+                "serviceConfigurations": {
+                    "type": "array",
+                    "description": "This will hold various configuration of a service. From Harmony prospective, it will be ESRN(LocationID), PRON(County),IMSTEMPLATEID (will be 5 for VOIP). This is mandatory if its 1 Step Provisioning. For 2 Step Provisioning, its optional when sending equipment details.",
+                    "items": {
+                        "$ref": "#/definitions/ServiceConfiguration"
+                    }
+                }
+            }
+        },
+        "ArrayOfSubmitProvisioningResponseType": {
+            "type": "object",
+            "properties": {
+                "submitProvisioningResponseTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SubmitProvisioningResponseType"
+                    }
+                }
+            }
+        },
+        "ArrayOfResourceConfigurations": {
+            "type": "object",
+            "properties": {
+                "resourceConfigurations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ResourceConfiguration"
+                    }
+                }
+            }
+        },
+        "Include": {
+            "type": "object",
+            "properties": {
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "href": {
+                    "type": "string"
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "SubmitProvisioningResponseType": {
+            "type": "object",
+            "properties": {
+                "errorSummaryList": {
+                    "$ref": "#/definitions/ArrayOfErrorSummary"
+                },
+                "lineOfBusiness": {
+                    "type": "string",
+                    "enum": [
+                        "VO_IP"
+                    ]
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tnStatusList": {
+                    "$ref": "#/definitions/ArrayOfTnStatus"
+                }
+            }
+        },
+        "SubmitProvisioning": {
+            "type": "object",
+            "properties": {
+                "provisioningReqType": {
+                    "$ref": "#/definitions/SubmitProvisioningType"
+                }
+            }
+        },
+        "ResourceConfiguration": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "ADD",
+                        "DELETE",
+                        "MODIFY",
+                        "NO_CHANGE"
+                    ]
+                },
+                "configName": {
+                    "type": "string",
+                    "description": "This will be the parameter name for configuration e.g. TELPHONE_NUMBER. TELEPHONE_NUMBER/MTA_MAC"
+                },
+                "configValue": {
+                    "type": "string",
+                    "description": "This will be the parameter value of the configuration of e.g. value TELEPHONE_NUMBER/MTA_MAC"
+                }
+            }
+        },
+        "ServiceRequestEquipment": {
+            "type": "object",
+            "properties": {
+                "componentAddress": {
+                    "$ref": "#/definitions/ArrayOfComponentAddress"
+                },
+                "make": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                }
+            }
+        },
+        "ArrayOfService": {
+            "type": "object",
+            "properties": {
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Service"
+                    }
+                }
+            }
+        },
+        "ArrayOfErrorSummary": {
+            "type": "object",
+            "properties": {
+                "errorSummaries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ErrorSummary"
+                    }
+                }
+            }
+        },
+        "ServiceConfiguration": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "ADD",
+                        "DELETE",
+                        "MODIFY",
+                        "NO_CHANGE"
+                    ]
+                },
+                "configName": {
+                    "type": "string"
+                },
+                "configValue": {
+                    "type": "string"
+                }
+            }
+        },
+        "SubmitProvisioningType": {
+            "type": "object",
+            "properties": {
+                "customerName": {
+                    "$ref": "#/definitions/PersonName"
+                },
+                "equipmentList": {
+                    "$ref": "#/definitions/ArrayOfEquipment"
+                },
+                "provisioningAttributes": {
+                    "$ref": "#/definitions/ProvisioningAttributes"
+                },
+                "serviceList": {
+                    "$ref": "#/definitions/ArrayOfService"
+                }
+            }
+        },
+        "ArrayOfFeatureConfigurations": {
+            "type": "object",
+            "properties": {
+                "featConfigurations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FeatureConfiguration"
+                    }
+                }
+            }
+        },
+        "ServiceRequestCustomerFeature": {
+            "type": "object",
+            "description": "This will hold various features of a service. for ex: CIDCW, CFBL, CW, SP30, TWC, INTERNATIONAL_BLOCK ",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "description": "Action for the feature object, e.g for adding the feature, action type will be add",
+                    "enum": [
+                        "ADD",
+                        "DISCONNECT",
+                        "SEASONAL_RESUME",
+                        "CHANGE",
+                        "NOCHANGE",
+                        "SEASONAL_SUSPEND",
+                        "NONPAY_SUSPEND",
+                        "NONPAY_RESUME",
+                        "ADD_CANCEL",
+                        "DISCONNECT_CANCEL",
+                        "DISABLE",
+                        "RESTORE"
+                    ]
+                },
+                "featConfigurationList": {
+                    "$ref": "#/definitions/ArrayOfFeatureConfigurations"
+                },
+                "featName": {
+                    "type": "string",
+                    "description": "Name of the feature e.g. CIDCW, CFBL, CW, SP30, TWC, INTERNATIONAL_BLOCK "
+                }
+            }
+        },
+        "Doc": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "ArrayOfServiceResource": {
+            "type": "object",
+            "properties": {
+                "serviceResources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ServiceResource"
+                    }
+                }
+            }
+        },
+        "ServiceResource": {
+            "type": "object",
+            "description": "This will hold the service respources",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "ADD",
+                        "DISCONNECT",
+                        "SEASONAL_RESUME",
+                        "CHANGE",
+                        "NOCHANGE",
+                        "SEASONAL_SUSPEND",
+                        "NONPAY_SUSPEND",
+                        "NONPAY_RESUME",
+                        "ADD_CANCEL",
+                        "DISCONNECT_CANCEL",
+                        "DISABLE",
+                        "RESTORE"
+                    ]
+                },
+                "resourceConfigurationList": {
+                    "$ref": "#/definitions/ArrayOfResourceConfigurations"
+                }
+            }
+        },
+        "ProvisioningAttributes": {
+            "type": "object",
+            "description": "Attributes for provisioning",
+            "properties": {
+                "dwellingType": {
+                    "type": "string",
+                    "description": "Dwelling type is needed for backend to identify flow weather its Residential customer or a business customer. For Cox, at this point it will be RESI",
+                    "enum": [
+                        "RESI",
+                        "BUS",
+                        "MDU",
+                        "TOPDOWN",
+                        "VIDEO"
+                    ]
+                },
+                "tenantAccountGUID": {
+                    "type": "string",
+                    "description": "TenantAccountGUID is unique identifier for each customer. "
+                },
+                "tenantId": {
+                    "type": "string",
+                    "description": "TenantID is for Comcast to identify which tenant is sending the request. For Harmony project, it will be COX "
+                }
+            },
+            "required": [
+                "dwellingType",
+                "tenantAccountGUID",
+                "tenantId"
+            ]
+        },
+        "ArrayOfComponentAddress": {
+            "type": "object",
+            "properties": {
+                "componentAddresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ComponentAddress"
+                    }
+                }
+            }
+        },
+        "PersonName": {
+            "type": "object",
+            "description": "Person Name details, required for POC",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "description": "First name of the customer, required for POC"
+                },
+                "lastName": {
+                    "type": "string",
+                    "description": "Last name of the customer, required for POC"
+                }
+            }
+        },
+        "QName": {
+            "type": "object",
+            "properties": {
+                "localPart": {
+                    "type": "string"
+                },
+                "namespaceURI": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "Resource": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "methodOrResource": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "param": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Param"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "queryType": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "Service": {
+            "type": "object",
+            "description": "List of Services, it can be Add, Disconnect.",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "description": "Action Type, please refer enum",
+                    "enum": [
+                        "ADD",
+                        "DISCONNECT",
+                        "SEASONAL_RESUME",
+                        "CHANGE",
+                        "NOCHANGE",
+                        "SEASONAL_SUSPEND",
+                        "NONPAY_SUSPEND",
+                        "NONPAY_RESUME",
+                        "ADD_CANCEL",
+                        "DISCONNECT_CANCEL",
+                        "DISABLE",
+                        "RESTORE"
+                    ]
+                },
+                "deliveryPlatform": {
+                    "type": "string",
+                    "description": "delivery platform details for ex: IMS"
+                },
+                "lineOfBusiness": {
+                    "type": "string",
+                    "description": "Line of business describes the type of the service for ex VO_IP",
+                    "enum": [
+                        "VO_IP"
+                    ]
+                },
+                "serviceConfigurationList": {
+                    "$ref": "#/definitions/ArrayOfServiceConfigurations"
+                },
+                "serviceFeatureList": {
+                    "$ref": "#/definitions/ArrayOfServiceFeature"
+                },
+                "serviceResourceList": {
+                    "$ref": "#/definitions/ArrayOfServiceResource"
+                }
+            },
+            "required": [
+                "action",
+                "serviceConfigurationList",
+                "deliveryPlatform",
+                "lineOfBusiness"
+            ]
+        },
+        "FeatureConfiguration": {
+            "type": "object",
+            "description": "These fields are used for providing feature level configurations e.g. if consumer want to add a call forwarding TN for AdvanceCallForwarding feature can be passed using this object.",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "ADD",
+                        "DELETE",
+                        "MODIFY",
+                        "NO_CHANGE"
+                    ]
+                },
+                "configName": {
+                    "type": "string",
+                    "description": "This will be the parameter name for feature configuration e.g. TELPHONE_NUMBER."
+                },
+                "configValue": {
+                    "type": "string",
+                    "description": "This will be the parameter value of the feature configuration  e.g. 6097451234."
+                }
+            }
+        },
+        "TnStatus": {
+            "type": "object",
+            "properties": {
+                "tn": {
+                    "type": "string"
+                },
+                "tnStatus": {
+                    "type": "string"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "detailMap": {
+                    "type": "object"
+                },
+                "details": {
+                    "type": "object"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "validationMessages": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ArrayOfEquipment": {
+            "type": "object",
+            "description": "Holds multiple equipments for a given service",
+            "properties": {
+                "equipments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Equipment"
+                    }
+                }
+            }
+        },
+        "Equipment": {
+            "type": "object",
+            "properties": {
+                "deliveryPlatform": {
+                    "type": "string",
+                    "description": "Delivery platform details for ex: IMS"
+                },
+                "serviceRequestEquipment": {
+                    "$ref": "#/definitions/ServiceRequestEquipment"
+                }
+            }
+        },
+        "ArrayOfTnStatus": {
+            "type": "object",
+            "properties": {
+                "tnStatuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TnStatus"
+                    }
+                }
+            }
+        },
+        "Param": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "default": {
+                    "type": "string"
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "fixed": {
+                    "type": "string"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "$ref": "#/definitions/Link"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "option": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Option"
+                    }
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "repeating": {
+                    "type": "boolean"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "style": {
+                    "type": "string",
+                    "enum": [
+                        "PLAIN",
+                        "QUERY",
+                        "MATRIX",
+                        "HEADER",
+                        "TEMPLATE"
+                    ]
+                },
+                "type": {
+                    "$ref": "#/definitions/QName"
+                }
+            }
+        },
+        "Option": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "mediaType": {
+                    "type": "string"
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "Resources": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "base": {
+                    "type": "string"
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "resource": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Resource"
+                    }
+                }
+            }
+        },
+        "Application": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "grammars": {
+                    "$ref": "#/definitions/Grammars"
+                },
+                "resourceTypeOrMethodOrRepresentation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Resources"
+                    }
+                }
+            }
+        },
+        "ArrayOfServiceFeature": {
+            "type": "object",
+            "properties": {
+                "serviceFeatures": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ServiceRequestCustomerFeature"
+                    }
+                }
+            }
+        },
+        "Grammars": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "include": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Include"
+                    }
+                }
+            }
+        },
+        "Link": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Doc"
+                    }
+                },
+                "otherAttributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "rel": {
+                    "type": "string"
+                },
+                "resourceType": {
+                    "type": "string"
+                },
+                "rev": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
